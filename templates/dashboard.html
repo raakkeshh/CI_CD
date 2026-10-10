@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard – CloudBuild Pro{% endblock %}
+
+{% block content %}
+<div class="container px-lg-4 py-4">
+    <!-- Header with Quick Actions -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h4 fw-bold mb-1 text-white">DevOps Overview</h1>
+            <p class="text-secondary small mb-0">Google Cloud Build CI/CD with manual approval gates</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-subtle text-secondary font-mono px-2 py-1 text-xs">
+                <i class="fa-solid fa-code-branch text-primary me-1"></i>{{ ctx.branch }}
+            </span>
+            <span class="badge bg-dark border border-subtle text-secondary font-mono px-2 py-1 text-xs">
+                <i class="fa-regular fa-clock me-1"></i>4m ago
+            </span>
+            <button class="btn btn-gcp-primary btn-sm" id="triggerBuildTopBtn" onclick="triggerSimulatedPipeline()">
+                <i class="fa-solid fa-play me-1"></i> Trigger Build
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 Key Minimal Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="gcp-card metric-box">
+                <div class="metric-label">Latest Build</div>
+                <div class="metric-val font-mono text-primary fs-5">{{ ctx.widgets.latest_build }}</div>
+                <div class="metric-sub"><i class="fa-regular fa-clock me-1"></i>Duration: {{ ctx.build_duration }}</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="gcp-card metric-box">
+                <div class="metric-label">Today's Deploys</div>
+                <div class="metric-val text-success">{{ ctx.widgets.today_deployments }}</div>
+                <div class="metric-sub"><i class="fa-solid fa-arrow-up text-success me-1"></i>All 3 environments active</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="gcp-card metric-box">
+                <div class="metric-label">Approval Gate</div>
+                <div class="metric-val text-warning">{{ ctx.widgets.approval_requests }} Pending</div>
+                <div class="metric-sub"><i class="fa-solid fa-shield-halved text-warning me-1"></i>Production promotion lock</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="gcp-card metric-box">
+                <div class="metric-label">Success Rate</div>
+                <div class="metric-val text-white">{{ ctx.widgets.success_rate }}</div>
+                <div class="metric-sub"><i class="fa-solid fa-check text-success me-1"></i>Avg build: {{ ctx.widgets.avg_build_time }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal Approval Gate Action Card -->
+    <div class="gate-card-minimal mb-4 {% if state.gate_status == 'Approved' %}approved{% elif state.gate_status == 'Rejected' %}rejected{% endif %}">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge-clean warning"><i class="fa-solid fa-lock me-1"></i>APPROVAL GATE</span>
+                    <span class="gate-status-text fw-semibold small text-warning">{{ state.gate_status }}</span>
+                </div>
+                <div class="text-white fw-bold small">Release candidate v2.4.1 ready for Production (us-central1)</div>
+                <div class="text-secondary text-xs mt-1 font-mono">
+                    Commit: <span class="text-white">{{ state.commit_hash }}</span> • Vulnerabilities: <span class="text-success">0 CVEs</span> • Deploy Status: <span class="deploy-status-text text-white">{{ state.deployment_status }}</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-gcp-success btn-sm btn-approve-gate px-3" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                    <i class="fa-solid fa-check me-1"></i> Approve
+                </button>
+                <button class="btn btn-gcp-danger btn-sm btn-reject-gate px-3" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                    <i class="fa-solid fa-xmark me-1"></i> Reject
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Status Cards (Clean Grid) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Repository Connected -->
+        <div class="col-md-4">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Repository</span>
+                    <span class="badge-clean success"><i class="fa-solid fa-link me-1"></i>Connected</span>
+                </div>
+                <div class="text-white fw-semibold small font-mono text-truncate">{{ ctx.repository }}</div>
+                <div class="text-muted text-xs mt-1">Default Branch: <span class="text-white">{{ ctx.branch }}</span></div>
+            </div>
+        </div>
+
+        <!-- 2. Latest Commit -->
+        <div class="col-md-4">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Latest Commit</span>
+                    <span class="badge-clean info font-mono">{{ ctx.commit_hash }}</span>
+                </div>
+                <div class="text-white fw-semibold small text-truncate" title="{{ ctx.commit_message }}">{{ ctx.commit_message }}</div>
+                <div class="text-muted text-xs mt-1">By <span class="text-white">{{ ctx.author }}</span></div>
+            </div>
+        </div>
+
+        <!-- 3. Cloud Build Status -->
+        <div class="col-md-4">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Cloud Build</span>
+                    <span class="badge-clean warning">{{ ctx.cloud_build_status }}</span>
+                </div>
+                <div class="text-white fw-semibold small font-mono">{{ ctx.worker_pool }}</div>
+                <div class="text-muted text-xs mt-1">Duration: <span class="text-warning">{{ ctx.build_duration }}</span> • {{ ctx.region }}</div>
+            </div>
+        </div>
+
+        <!-- 4. Artifact Registry -->
+        <div class="col-md-6">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Artifact Registry</span>
+                    <span class="badge-clean success">Clean</span>
+                </div>
+                <div class="text-white small font-mono text-truncate" title="{{ ctx.artifact_registry_repo }}:{{ ctx.artifact_tag }}">
+                    {{ ctx.artifact_registry_repo }}:{{ ctx.artifact_tag }}
+                </div>
+                <div class="text-muted text-xs mt-1">Size: <span class="text-white">{{ ctx.artifact_size }}</span> • {{ ctx.vulnerabilities }}</div>
+            </div>
+        </div>
+
+        <!-- 5. Cloud Run -->
+        <div class="col-md-6">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Cloud Run Service</span>
+                    <span class="badge-clean success"><span class="pulse-dot me-1"></span>Live</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-white small font-mono">{{ ctx.cloud_run.revision }}</span>
+                    <a href="{{ ctx.cloud_run.url }}" target="_blank" class="text-primary small text-decoration-none">
+                        Open <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                </div>
+                <div class="text-muted text-xs mt-1">Traffic: <span class="text-white">{{ ctx.cloud_run.traffic_allocation }}</span> • Instances: <span class="text-white">{{ ctx.cloud_run.active_instances }}</span> • Latency: <span class="text-white">{{ ctx.cloud_run.latency }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Progress & Execution Timeline Row -->
+    <div class="row g-3 mb-4">
+        <!-- Circular Progress Indicator -->
+        <div class="col-lg-4">
+            <div class="gcp-card p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="metric-label mb-3">Pipeline Health Index</div>
+                    <div class="d-flex align-items-center gap-3 my-2">
+                        <div class="progress-radial-minimal">
+                            <svg viewBox="0 0 90 90">
+                                <circle class="bg-ring" cx="45" cy="45" r="38"></circle>
+                                <circle class="fg-ring" cx="45" cy="45" r="38"></circle>
+                            </svg>
+                            <div class="progress-radial-val">98.4%</div>
+                        </div>
+                        <div>
+                            <div class="text-white fw-semibold small">SLA Target Met</div>
+                            <div class="text-muted text-xs mt-1">42/42 unit tests passed, zero high CVEs, and automatic Canary validation.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 border-top border-subtle d-flex justify-content-between text-xs text-secondary">
+                    <span>MTTR: <strong class="text-white">4m 12s</strong></span>
+                    <span>Lead Time: <strong class="text-white">6m 30s</strong></span>
+                    <span>Change Fail: <strong class="text-success">&lt;1.2%</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Build Timeline -->
+        <div class="col-lg-8">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="metric-label mb-0">Build Timeline (cb-94821-prod)</span>
+                    <span class="text-muted text-xs font-mono">e2-highcpu-8 worker</span>
+                </div>
+                <div class="timeline-minimal">
+                    <div class="timeline-step">
+                        <div class="timeline-indicator done"></div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-white fw-semibold">Step 0: Git Checkout (7f9b2a1)</span>
+                            <span class="text-muted font-mono text-xs">4s</span>
+                        </div>
+                        <div class="text-muted text-xs">Verified GPG commit signature</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-indicator done"></div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-white fw-semibold">Step 1: Pytest &amp; Linting</span>
+                            <span class="text-muted font-mono text-xs">35s</span>
+                        </div>
+                        <div class="text-muted text-xs">42 tests passed • 96.4% code coverage</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-indicator done"></div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-white fw-semibold">Step 2: Kaniko Container Build</span>
+                            <span class="text-muted font-mono text-xs">48s</span>
+                        </div>
+                        <div class="text-muted text-xs">Cache hit 85.7% • 58.4 MB OCI image</div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-indicator active"></div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-warning fw-semibold">Step 3: Manual Approval Gate</span>
+                            <span class="badge-clean warning">WAITING</span>
+                        </div>
+                        <div class="text-muted text-xs">Awaiting DevOps Lead sign-off for Cloud Run release</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="gcp-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Weekly Build Activity</span>
+                    <span class="text-muted text-xs">Last 7 Days</span>
+                </div>
+                <div style="height: 200px;">
+                    <canvas id="weeklyBuildChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="gcp-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="metric-label mb-0">Build Outcomes</span>
+                    <span class="text-muted text-xs">229 Runs</span>
+                </div>
+                <div style="height: 200px;">
+                    <canvas id="buildSuccessPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function triggerSimulatedPipeline() {
+        const btn = document.getElementById('triggerBuildTopBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Queuing...';
+        
+        fetch('/api/pipeline/trigger', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                showToast('Build Queued', data.message, 'success');
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Trigger Build';
+                }, 1000);
+            })
+            .catch(() => {
+                showToast('Build Triggered', 'Simulated build started on private worker pool.', 'info');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-play me-1"></i> Trigger Build';
+            });
+    }
+</script>
+{% endblock %}

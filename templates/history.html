@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}History – CloudBuild Pro{% endblock %}
+
+{% block content %}
+<div class="container px-lg-4 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h4 fw-bold mb-1 text-white">Build History</h1>
+            <p class="text-secondary small mb-0">Audited execution history and logs across all environments</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-dark border border-subtle text-secondary font-mono px-2 py-1 text-xs" id="recordCountBadge">
+                {{ builds|length }} records
+            </span>
+            <button class="btn btn-gcp-outline btn-sm" onclick="showToast('Export', 'Exported build telemetry to CSV.', 'info')">
+                <i class="fa-solid fa-download me-1"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="gcp-card p-2 mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control border-0 bg-transparent text-white" id="buildSearchInput" placeholder="Filter by ID, commit, developer, or message...">
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <select class="form-select form-select-sm" id="envFilterSelect">
+                    <option value="all" selected>All Environments</option>
+                    <option value="Production">Production</option>
+                    <option value="Staging">Staging</option>
+                    <option value="Development">Development</option>
+                </select>
+            </div>
+            <div class="col-md-3 col-6">
+                <select class="form-select form-select-sm" id="statusFilterSelect">
+                    <option value="all" selected>All Statuses</option>
+                    <option value="Success">Success</option>
+                    <option value="Running">Running</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimalist Table -->
+    <div class="gcp-card p-0 mb-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table-minimal">
+                <thead>
+                    <tr>
+                        <th>Build ID</th>
+                        <th>Commit</th>
+                        <th>Developer</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Date</th>
+                        <th>Env</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="buildHistoryTableBody">
+                    {% for build in builds %}
+                    <tr class="build-history-row"
+                        data-build-id="{{ build.id }}"
+                        data-commit="{{ build.commit }}"
+                        data-dev="{{ build.developer }}"
+                        data-status="{{ build.status }}"
+                        data-env="{{ build.environment }}"
+                        data-msg="{{ build.commit_msg }}"
+                        data-logs='{{ build.logs | tojson }}'>
+                        
+                        <td class="font-mono text-white fw-semibold">
+                            {{ build.id }}
+                            {% if build.approval_required %}
+                            <span class="badge-clean warning ms-1 text-xs">Gate</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="d-flex align-items-center gap-1 font-mono text-xs">
+                                <span class="text-primary cursor-pointer" onclick="copyToClipboard('{{ build.commit }}')" title="Copy SHA">{{ build.commit }}</span>
+                                <span class="text-muted">({{ build.branch }})</span>
+                            </div>
+                            <div class="text-muted text-xs text-truncate" style="max-width: 220px;" title="{{ build.commit_msg }}">
+                                {{ build.commit_msg }}
+                            </div>
+                        </td>
+
+                        <td class="small text-white">
+                            {{ build.developer }}
+                        </td>
+
+                        <td>
+                            {% if build.status == 'Success' %}
+                            <span class="badge-clean success">Success</span>
+                            {% elif build.status == 'Running' %}
+                            <span class="badge-clean info"><span class="pulse-dot-blue me-1"></span>Running</span>
+                            {% elif build.status == 'Failed' %}
+                            <span class="badge-clean danger">Failed</span>
+                            {% elif build.status == 'Cancelled' %}
+                            <span class="badge-clean muted">Cancelled</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="font-mono text-muted text-xs">
+                            {{ build.duration }}
+                        </td>
+
+                        <td class="text-muted text-xs">
+                            {{ build.date }}
+                        </td>
+
+                        <td>
+                            {% if build.environment == 'Production' %}
+                            <span class="badge-clean danger">Prod</span>
+                            {% elif build.environment == 'Staging' %}
+                            <span class="badge-clean warning">Stg</span>
+                            {% else %}
+                            <span class="badge-clean info">Dev</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-3">
+                            <button class="btn btn-gcp-outline btn-xs btn-view-logs py-1 px-2 text-xs">
+                                Logs
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center text-xs text-muted">
+        <div>Showing 1 to {{ builds|length }} of 229 builds</div>
+        <div class="d-flex gap-1">
+            <button class="btn btn-gcp-outline btn-xs py-1 px-2" disabled>Prev</button>
+            <button class="btn btn-gcp-primary btn-xs py-1 px-2">1</button>
+            <button class="btn btn-gcp-outline btn-xs py-1 px-2" onclick="showToast('Pagination', 'Loaded page 2', 'info')">2</button>
+            <button class="btn btn-gcp-outline btn-xs py-1 px-2">Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Log Terminal -->
+<div class="modal fade" id="buildLogModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title h6 fw-bold text-white mb-0">
+                        Logs: <span id="logModalBuildId" class="text-primary font-mono"></span>
+                    </h5>
+                    <span class="text-muted text-xs font-mono">
+                        Commit: <span id="logModalCommit" class="text-white"></span> • 
+                        Env: <span id="logModalEnv" class="text-warning"></span> • 
+                        Status: <span id="logModalStatus" class="text-success"></span>
+                    </span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="terminal-window border-0 rounded-0">
+                    <div class="terminal-body font-mono text-xs" style="max-height: 320px;" id="logModalTerminalContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-gcp-outline btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

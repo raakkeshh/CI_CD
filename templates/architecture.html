@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Architecture – CloudBuild Pro{% endblock %}
+
+{% block content %}
+<div class="container px-lg-4 py-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="h4 fw-bold mb-1 text-white">System Architecture</h1>
+        <p class="text-secondary small mb-0">Google Cloud serverless delivery model with governance approval gates</p>
+    </div>
+
+    <!-- Minimalist Flowchart Stepper -->
+    <div class="gcp-card p-4 mb-4">
+        <span class="metric-label mb-3 d-block">Delivery Flow Diagram</span>
+        <div class="stepper-container">
+            <div class="stepper-item">
+                <i class="fa-brands fa-github stepper-icon text-primary"></i>
+                <div class="stepper-title">1. GitHub</div>
+                <span class="text-muted text-xs">Push Webhook</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item">
+                <i class="fa-solid fa-screwdriver-wrench stepper-icon text-primary"></i>
+                <div class="stepper-title">2. Cloud Build</div>
+                <span class="text-muted text-xs">Worker Pool</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item">
+                <i class="fa-brands fa-docker stepper-icon text-info"></i>
+                <div class="stepper-title">3. Docker</div>
+                <span class="text-muted text-xs">Kaniko Cache</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item">
+                <i class="fa-solid fa-cubes stepper-icon text-success"></i>
+                <div class="stepper-title">4. Artifact Registry</div>
+                <span class="text-muted text-xs">OCI Store</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item waiting">
+                <i class="fa-solid fa-user-shield stepper-icon text-warning"></i>
+                <div class="stepper-title">5. Approval Gate</div>
+                <span class="badge-clean warning">Manual Gate</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item">
+                <i class="fa-solid fa-cloud-arrow-up stepper-icon text-primary"></i>
+                <div class="stepper-title">6. Cloud Run</div>
+                <span class="text-muted text-xs">Serverless</span>
+            </div>
+            <div class="text-muted"><i class="fa-solid fa-angle-right"></i></div>
+
+            <div class="stepper-item">
+                <i class="fa-solid fa-globe stepper-icon text-success"></i>
+                <div class="stepper-title">7. End Users</div>
+                <span class="text-muted text-xs">Global CDN</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Explanations (Clean 2-Column Grid) -->
+    <span class="metric-label mb-3 d-block">Component Breakdown</span>
+    <div class="row g-3 mb-4">
+        {% for comp in components %}
+        <div class="col-md-6">
+            <div class="gcp-card p-3 h-100">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="{{ comp.icon }} text-primary"></i>
+                    <h2 class="h6 fw-bold text-white mb-0">{{ comp.name }}</h2>
+                    <span class="badge-clean info ms-auto text-xs">{{ comp.tag }}</span>
+                </div>
+                <p class="text-secondary small mb-2">{{ comp.summary }}</p>
+                <div class="text-xs text-muted">
+                    <strong class="text-white">Role:</strong> {{ comp.role }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Security & Compliance Note -->
+    <div class="gcp-card p-3">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="fa-solid fa-shield-halved text-success"></i>
+            <span class="text-white fw-bold small">Enterprise Security Policy</span>
+        </div>
+        <p class="text-secondary small mb-0">
+            Enforces Binary Authorization with Cloud KMS attestations. Deployments to Cloud Run are blocked unless automated test suites, vulnerability scans, and manual approval gates are successfully satisfied.
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Pipeline – CloudBuild Pro{% endblock %}
+
+{% block content %}
+<div class="container px-lg-4 py-4">
+    <!-- Header with Actions -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h4 fw-bold mb-1 text-white">CI/CD Pipeline</h1>
+            <p class="text-secondary small mb-0">9-stage automated deployment workflow with manual approval gate</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-gcp-outline btn-sm" onclick="showToast('Cloud Logging', 'Streaming Cloud Build worker logs...', 'info')">
+                <i class="fa-solid fa-terminal me-1"></i> Stream Logs
+            </button>
+            <button class="btn btn-gcp-primary btn-sm" id="runPipelineSimulationBtn">
+                <i class="fa-solid fa-play me-1"></i> Run Pipeline Simulation
+            </button>
+        </div>
+    </div>
+
+    <!-- 9-Stage Stepper Flow -->
+    <div class="gcp-card p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="metric-label mb-0">Pipeline Stages (Click any node to inspect)</span>
+            <span class="text-muted text-xs">Build: <strong class="text-white font-mono">{{ state.current_build_id }}</strong></span>
+        </div>
+
+        <div class="stepper-container">
+            {% for stage in stages %}
+            <div class="stepper-item {% if stage.status == 'COMPLETED' %}completed{% elif stage.status == 'WAITING_APPROVAL' %}waiting{% elif stage.status == 'REJECTED' %}rejected{% else %}pending{% endif %} pipeline-node"
+                 data-stage-id="{{ stage.id }}"
+                 data-stage-name="{{ stage.name }}"
+                 data-stage-gcp="{{ stage.gcp_service }}"
+                 data-stage-desc="{{ stage.desc }}"
+                 data-stage-duration="{{ stage.duration }}"
+                 data-stage-status="{{ stage.status }}"
+                 data-stage-logs="{% for k, v in stage.details.items() %}[{{ k }}] {{ v }}&#10;{% endfor %}">
+                <i class="{{ stage.icon }} stepper-icon text-muted"></i>
+                <div class="stepper-title">{{ stage.id }}. {{ stage.name }}</div>
+                <div>
+                    {% if stage.status == 'COMPLETED' %}
+                    <span class="badge-clean success stage-status-badge">Done</span>
+                    {% elif stage.status == 'WAITING_APPROVAL' %}
+                    <span class="badge-clean warning stage-status-badge">Gate</span>
+                    {% elif stage.status == 'REJECTED' %}
+                    <span class="badge-clean danger stage-status-badge">Rejected</span>
+                    {% else %}
+                    <span class="badge-clean muted stage-status-badge">Pending</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Interactive Approval Gate & Live Log Console -->
+    <div class="row g-3 mb-4">
+        <!-- Manual Approval Gate -->
+        <div class="col-lg-6">
+            <div class="gcp-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="metric-label mb-0">Manual Approval Gate</span>
+                        <span class="gate-status-text badge-clean warning font-mono">{{ state.gate_status }}</span>
+                    </div>
+
+                    <div class="gate-card-minimal mb-3 {% if state.gate_status == 'Approved' %}approved{% elif state.gate_status == 'Rejected' %}rejected{% endif %}">
+                        <div class="text-white fw-bold small mb-1">Production Release Lock Active</div>
+                        <p class="text-muted text-xs mb-2">
+                            All automated tests, Kaniko container build, and Container Analysis security scans passed. Paused for DevOps Manager sign-off before routing Cloud Run traffic.
+                        </p>
+                        <div class="text-xs font-mono text-secondary">
+                            Target: <span class="text-white">{{ state.target_env }}</span> • Required IAM: <span class="text-warning">roles/cloudbuild.approver</span>
+                        </div>
+                    </div>
+
+                    <div class="p-2 rounded bg-dark border border-subtle d-flex justify-content-between align-items-center small mb-3">
+                        <span class="text-secondary text-xs">Deployment Status:</span>
+                        <span class="deploy-status-text text-white fw-semibold text-xs font-mono">{{ state.deployment_status }}</span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-gcp-success btn-sm btn-approve-gate flex-grow-1" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                        <i class="fa-solid fa-check me-1"></i> Approve Release
+                    </button>
+                    <button class="btn btn-gcp-danger btn-sm btn-reject-gate flex-grow-1" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                        <i class="fa-solid fa-xmark me-1"></i> Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Step Console -->
+        <div class="col-lg-6">
+            <div class="terminal-window h-100 d-flex flex-column">
+                <div class="terminal-header">
+                    <span><i class="fa-solid fa-terminal me-1"></i>gcloud builds log --stream</span>
+                    <span class="badge-clean success">Live Stream</span>
+                </div>
+                <div class="terminal-body flex-grow-1 font-mono text-xs">
+                    <div>[09:42:01] <span class="text-primary">[Cloud Build]</span> Worker initialized on private-worker-pool-uscentral1</div>
+                    <div>[09:42:04] <span class="text-primary">[GitHub]</span> Webhook push received. Checked out branch main @ 7f9b2a1</div>
+                    <div>[09:42:15] <span class="text-primary">[Pytest]</span> 42/42 tests passed (100% success rate)</div>
+                    <div>[09:42:48] <span class="text-primary">[Kaniko]</span> Built python:3.11-slim container. Layer cache hit: 85.7%</div>
+                    <div>[09:43:20] <span class="text-success">[Artifact Registry]</span> Pushed us-central1-docker.pkg.dev/.../web-app:v2.4.1</div>
+                    <div>[09:43:55] <span class="text-success">[Security Scan]</span> 0 Critical, 0 High vulnerabilities detected</div>
+                    <div>[09:44:10] <span class="text-warning">[APPROVAL_GATE]</span> Paused waiting for manager approval via GCP IAM Policy...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal Stage Cards Summary -->
+    <div class="gcp-card p-3">
+        <span class="metric-label mb-3 d-block">Stage Telemetry Specifications</span>
+        <div class="row g-2">
+            {% for stage in stages %}
+            <div class="col-md-4 col-sm-6">
+                <div class="p-2 rounded bg-dark border border-subtle h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-white fw-semibold text-xs">{{ stage.id }}. {{ stage.name }}</span>
+                        <span class="text-muted font-mono text-xs">{{ stage.duration }}</span>
+                    </div>
+                    <div class="text-muted text-xs text-truncate">{{ stage.gcp_service }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Stage Details -->
+<div class="modal fade" id="stageDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title h6 fw-bold text-white mb-0" id="modalStageName">Stage Details</h5>
+                    <span class="text-muted text-xs" id="modalStageGcp">Google Cloud Service</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between text-xs mb-3 p-2 rounded bg-dark border border-subtle font-mono">
+                    <span>Duration: <strong class="text-white" id="modalStageDuration">--</strong></span>
+                    <span>Status: <strong class="text-success" id="modalStageStatus">COMPLETED</strong></span>
+                </div>
+                <p class="text-secondary small mb-3" id="modalStageDesc"></p>
+                <div class="terminal-window">
+                    <div class="terminal-body text-xs" style="max-height: 180px;" id="modalStageLogs"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-gcp-outline btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
