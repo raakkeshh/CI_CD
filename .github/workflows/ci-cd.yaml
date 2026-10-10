@@ -38,3 +38,25 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build -t ci-cd-app .
+
+  deploy-staging:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying application to STAGING..."
+          echo "Deployment successful."
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deploying application to PRODUCTION..."
+          echo "Deployment successful."
