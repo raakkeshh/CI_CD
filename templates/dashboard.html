@@ -7,7 +7,7 @@
     <!-- Header with Quick Actions -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-            <h1 class="h4 fw-bold mb-1 text-white">DevOps Overview</h1>
+            <h1 class="h4 fw-bold mb-1 text-white">CI/CD Overview</h1>
             <p class="text-secondary small mb-0">Google Cloud Build CI/CD with manual approval gates</p>
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -36,27 +36,31 @@
             <div class="gcp-card metric-box">
                 <div class="metric-label">Today's Deploys</div>
                 <div class="metric-val text-success">{{ ctx.widgets.today_deployments }}</div>
-                <div class="metric-sub"><i class="fa-solid fa-arrow-up text-success me-1"></i>All 3 environments active</div>
+                <div class="metric-sub"><i class="fa-solid fa-arrow-up text-success me-1"></i>All 3 environments active
+                </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
             <div class="gcp-card metric-box">
                 <div class="metric-label">Approval Gate</div>
                 <div class="metric-val text-warning">{{ ctx.widgets.approval_requests }} Pending</div>
-                <div class="metric-sub"><i class="fa-solid fa-shield-halved text-warning me-1"></i>Production promotion lock</div>
+                <div class="metric-sub"><i class="fa-solid fa-shield-halved text-warning me-1"></i>Production promotion
+                    lock</div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
             <div class="gcp-card metric-box">
                 <div class="metric-label">Success Rate</div>
                 <div class="metric-val text-white">{{ ctx.widgets.success_rate }}</div>
-                <div class="metric-sub"><i class="fa-solid fa-check text-success me-1"></i>Avg build: {{ ctx.widgets.avg_build_time }}</div>
+                <div class="metric-sub"><i class="fa-solid fa-check text-success me-1"></i>Avg build: {{
+                    ctx.widgets.avg_build_time }}</div>
             </div>
         </div>
     </div>
 
     <!-- Minimal Approval Gate Action Card -->
-    <div class="gate-card-minimal mb-4 {% if state.gate_status == 'Approved' %}approved{% elif state.gate_status == 'Rejected' %}rejected{% endif %}">
+    <div
+        class="gate-card-minimal mb-4 {% if state.gate_status == 'Approved' %}approved{% elif state.gate_status == 'Rejected' %}rejected{% endif %}">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
                 <div class="d-flex align-items-center gap-2 mb-1">
@@ -65,14 +69,18 @@
                 </div>
                 <div class="text-white fw-bold small">Release candidate v2.4.1 ready for Production (us-central1)</div>
                 <div class="text-secondary text-xs mt-1 font-mono">
-                    Commit: <span class="text-white">{{ state.commit_hash }}</span> • Vulnerabilities: <span class="text-success">0 CVEs</span> • Deploy Status: <span class="deploy-status-text text-white">{{ state.deployment_status }}</span>
+                    Commit: <span class="text-white">{{ state.commit_hash }}</span> • Vulnerabilities: <span
+                        class="text-success">0 CVEs</span> • Deploy Status: <span
+                        class="deploy-status-text text-white">{{ state.deployment_status }}</span>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-gcp-success btn-sm btn-approve-gate px-3" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                <button class="btn btn-gcp-success btn-sm btn-approve-gate px-3" {% if state.gate_status
+                    !='Waiting for Manager Approval' %}disabled{% endif %}>
                     <i class="fa-solid fa-check me-1"></i> Approve
                 </button>
-                <button class="btn btn-gcp-danger btn-sm btn-reject-gate px-3" {% if state.gate_status != 'Waiting for Manager Approval' %}disabled{% endif %}>
+                <button class="btn btn-gcp-danger btn-sm btn-reject-gate px-3" {% if state.gate_status
+                    !='Waiting for Manager Approval' %}disabled{% endif %}>
                     <i class="fa-solid fa-xmark me-1"></i> Reject
                 </button>
             </div>
@@ -89,7 +97,8 @@
                     <span class="badge-clean success"><i class="fa-solid fa-link me-1"></i>Connected</span>
                 </div>
                 <div class="text-white fw-semibold small font-mono text-truncate">{{ ctx.repository }}</div>
-                <div class="text-muted text-xs mt-1">Default Branch: <span class="text-white">{{ ctx.branch }}</span></div>
+                <div class="text-muted text-xs mt-1">Default Branch: <span class="text-white">{{ ctx.branch }}</span>
+                </div>
             </div>
         </div>
 
@@ -100,7 +109,8 @@
                     <span class="metric-label mb-0">Latest Commit</span>
                     <span class="badge-clean info font-mono">{{ ctx.commit_hash }}</span>
                 </div>
-                <div class="text-white fw-semibold small text-truncate" title="{{ ctx.commit_message }}">{{ ctx.commit_message }}</div>
+                <div class="text-white fw-semibold small text-truncate" title="{{ ctx.commit_message }}">{{
+                    ctx.commit_message }}</div>
                 <div class="text-muted text-xs mt-1">By <span class="text-white">{{ ctx.author }}</span></div>
             </div>
         </div>
@@ -113,7 +123,8 @@
                     <span class="badge-clean warning">{{ ctx.cloud_build_status }}</span>
                 </div>
                 <div class="text-white fw-semibold small font-mono">{{ ctx.worker_pool }}</div>
-                <div class="text-muted text-xs mt-1">Duration: <span class="text-warning">{{ ctx.build_duration }}</span> • {{ ctx.region }}</div>
+                <div class="text-muted text-xs mt-1">Duration: <span class="text-warning">{{ ctx.build_duration
+                        }}</span> • {{ ctx.region }}</div>
             </div>
         </div>
 
@@ -124,10 +135,12 @@
                     <span class="metric-label mb-0">Artifact Registry</span>
                     <span class="badge-clean success">Clean</span>
                 </div>
-                <div class="text-white small font-mono text-truncate" title="{{ ctx.artifact_registry_repo }}:{{ ctx.artifact_tag }}">
+                <div class="text-white small font-mono text-truncate"
+                    title="{{ ctx.artifact_registry_repo }}:{{ ctx.artifact_tag }}">
                     {{ ctx.artifact_registry_repo }}:{{ ctx.artifact_tag }}
                 </div>
-                <div class="text-muted text-xs mt-1">Size: <span class="text-white">{{ ctx.artifact_size }}</span> • {{ ctx.vulnerabilities }}</div>
+                <div class="text-muted text-xs mt-1">Size: <span class="text-white">{{ ctx.artifact_size }}</span> • {{
+                    ctx.vulnerabilities }}</div>
             </div>
         </div>
 
@@ -144,7 +157,10 @@
                         Open <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                     </a>
                 </div>
-                <div class="text-muted text-xs mt-1">Traffic: <span class="text-white">{{ ctx.cloud_run.traffic_allocation }}</span> • Instances: <span class="text-white">{{ ctx.cloud_run.active_instances }}</span> • Latency: <span class="text-white">{{ ctx.cloud_run.latency }}</span></div>
+                <div class="text-muted text-xs mt-1">Traffic: <span class="text-white">{{
+                        ctx.cloud_run.traffic_allocation }}</span> • Instances: <span class="text-white">{{
+                        ctx.cloud_run.active_instances }}</span> • Latency: <span class="text-white">{{
+                        ctx.cloud_run.latency }}</span></div>
             </div>
         </div>
     </div>
@@ -166,7 +182,8 @@
                         </div>
                         <div>
                             <div class="text-white fw-semibold small">SLA Target Met</div>
-                            <div class="text-muted text-xs mt-1">42/42 unit tests passed, zero high CVEs, and automatic Canary validation.</div>
+                            <div class="text-muted text-xs mt-1">42/42 unit tests passed, zero high CVEs, and automatic
+                                Canary validation.</div>
                         </div>
                     </div>
                 </div>
@@ -257,7 +274,7 @@
         const btn = document.getElementById('triggerBuildTopBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Queuing...';
-        
+
         fetch('/api/pipeline/trigger', { method: 'POST' })
             .then(res => res.json())
             .then(data => {

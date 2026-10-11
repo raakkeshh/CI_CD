@@ -1,38 +1,49 @@
 {% extends "base.html" %}
 
-{% block title %}About – CloudBuild Pro{% endblock %}
+{% block title %}About – CloudBuild Pro v2{% endblock %}
 
 {% block content %}
 <div class="container px-lg-4 py-4" style="max-width: 900px;">
     <!-- Header -->
     <div class="mb-4">
         <h1 class="h4 fw-bold mb-1 text-white">About CloudBuild Pro</h1>
-        <p class="text-secondary small mb-0">Google Cloud DevOps CI/CD pipeline automation with governance approval gates</p>
+        <p class="text-secondary small mb-0">Google Cloud DevOps CI/CD pipeline automation with governance approval
+            gates</p>
     </div>
 
     <!-- Core Concepts (Minimalist Cards) -->
     <div class="d-flex flex-column gap-3 mb-4">
         <!-- CI/CD -->
         <div class="gcp-card p-3">
-            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-infinity text-primary me-2"></i>What is CI/CD?</h2>
+            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-infinity text-primary me-2"></i>What is CI/CD?
+            </h2>
             <p class="text-secondary small mb-0">
-                Continuous Integration (CI) automates the process of merging developer code, running unit tests, and building containers on every git push. Continuous Delivery (CD) automatically promotes validated artifacts into staging and production environments, eliminating manual release delays.
+                Continuous Integration (CI) automates the process of merging developer code, running unit tests, and
+                building containers on every git push. Continuous Delivery (CD) automatically promotes validated
+                artifacts into staging and production environments, eliminating manual release delays.
             </p>
         </div>
 
         <!-- Cloud Build -->
         <div class="gcp-card p-3">
-            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-screwdriver-wrench text-success me-2"></i>What is Google Cloud Build?</h2>
+            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-screwdriver-wrench text-success me-2"></i>What
+                is Google Cloud Build?</h2>
             <p class="text-secondary small mb-0">
-                Google Cloud Build is a fully managed, serverless platform that executes build steps inside isolated container environments on Google Cloud infrastructure. It scales from 0 to hundreds of concurrent builds, integrating natively with Artifact Registry and Cloud Run.
+                Google Cloud Build is a fully managed, serverless platform that executes build steps inside isolated
+                container environments on Google Cloud infrastructure. It scales from 0 to hundreds of concurrent
+                builds, integrating natively with Artifact Registry and Cloud Run.
             </p>
         </div>
 
         <!-- Why Approval Gates -->
         <div class="gcp-card p-3">
-            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-user-shield text-warning me-2"></i>Why Approval Gates?</h2>
+            <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-user-shield text-warning me-2"></i>Why Approval
+                Gates?</h2>
             <p class="text-secondary small mb-0">
-                While automated tests catch regression bugs, production releases in financial, healthcare, and high-concurrency systems mandate authorized human sign-off. Cloud Build Approval Gates pause execution, requiring release managers (<code class="font-mono text-warning">roles/cloudbuild.approver</code>) to inspect security scans and change windows before live traffic shifts.
+                While automated tests catch regression bugs, production releases in financial, healthcare, and
+                high-concurrency systems mandate authorized human sign-off. Cloud Build Approval Gates pause execution,
+                requiring release managers (<code class="font-mono text-warning">roles/cloudbuild.approver</code>) to
+                inspect security scans and change windows before live traffic shifts.
             </p>
         </div>
     </div>
@@ -42,36 +53,47 @@
     <div class="row g-2 mb-4">
         <div class="col-sm-6">
             <div class="p-3 rounded bg-dark border border-subtle h-100">
-                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-bolt text-primary me-1"></i> Faster Release Cycles</div>
-                <div class="text-muted text-xs">Parallel build execution with Kaniko layer caching cuts deployment times down to minutes.</div>
+                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-bolt text-primary me-1"></i> Faster
+                    Release Cycles</div>
+                <div class="text-muted text-xs">Parallel build execution with Kaniko layer caching cuts deployment times
+                    down to minutes.</div>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="p-3 rounded bg-dark border border-subtle h-100">
-                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-shield-halved text-success me-1"></i> Shift-Left Security</div>
-                <div class="text-muted text-xs">Automated CVE vulnerability detection intercepts vulnerable dependencies before rollout.</div>
+                <div class="text-white fw-semibold small mb-1"><i
+                        class="fa-solid fa-shield-halved text-success me-1"></i> Shift-Left Security</div>
+                <div class="text-muted text-xs">Automated CVE vulnerability detection intercepts vulnerable dependencies
+                    before rollout.</div>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="p-3 rounded bg-dark border border-subtle h-100">
-                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-scale-balanced text-warning me-1"></i> Compliance &amp; Auditability</div>
-                <div class="text-muted text-xs">Every manual approval or rejection is signed and recorded in Google Cloud Audit Logs.</div>
+                <div class="text-white fw-semibold small mb-1"><i
+                        class="fa-solid fa-scale-balanced text-warning me-1"></i> Compliance &amp; Auditability</div>
+                <div class="text-muted text-xs">Every manual approval or rejection is signed and recorded in Google
+                    Cloud Audit Logs.</div>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="p-3 rounded bg-dark border border-subtle h-100">
-                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-coins text-info me-1"></i> Serverless Efficiency</div>
-                <div class="text-muted text-xs">Zero idle server costs. Pay strictly for exact build execution seconds on Google Cloud.</div>
+                <div class="text-white fw-semibold small mb-1"><i class="fa-solid fa-coins text-info me-1"></i>
+                    Serverless Efficiency</div>
+                <div class="text-muted text-xs">Zero idle server costs. Pay strictly for exact build execution seconds
+                    on Google Cloud.</div>
             </div>
         </div>
     </div>
 
     <!-- Future Scope -->
     <div class="gcp-card p-3">
-        <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-primary me-2"></i>Future Roadmap</h2>
+        <h2 class="h6 fw-bold text-white mb-2"><i class="fa-solid fa-wand-magic-sparkles text-primary me-2"></i>Future
+            Roadmap</h2>
         <ul class="text-secondary small ps-3 mb-0">
-            <li class="mb-1"><strong>Gemini AI Log Triage:</strong> Automatic root-cause diagnostics when unit test suites fail.</li>
-            <li class="mb-1"><strong>Automated Canary Rollbacks:</strong> Reverting Cloud Run revisions if error rates spike above 0.5%.</li>
+            <li class="mb-1"><strong>Gemini AI Log Triage:</strong> Automatic root-cause diagnostics when unit test
+                suites fail.</li>
+            <li class="mb-1"><strong>Automated Canary Rollbacks:</strong> Reverting Cloud Run revisions if error rates
+                spike above 0.5%.</li>
             <li><strong>Multi-Region Sync:</strong> Coordinated staged rollouts across global GCP regions.</li>
         </ul>
     </div>
